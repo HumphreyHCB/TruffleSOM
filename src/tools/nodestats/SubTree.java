@@ -29,7 +29,6 @@ final class SubTree implements Comparable<SubTree> {
   }
 
   public void yamlPrint(final StringBuilder builder, final String indent, final int level) {
-
     for (int i = 0; i < level; i += 1) {
       builder.append(indent);
     }

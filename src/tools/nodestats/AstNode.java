@@ -184,7 +184,7 @@ public class AstNode implements Comparable<AstNode> {
   }
 
   public void yamlPrint(final StringBuilder builder, final String indent, final int level) {
-    builder.append(nodeClass.getSimpleName());
+    builder.append(nodeClass.getName());
 
     builder.append(":\n");
 
