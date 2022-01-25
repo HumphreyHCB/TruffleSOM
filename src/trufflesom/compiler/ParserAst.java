@@ -45,6 +45,7 @@ import trufflesom.interpreter.nodes.literals.GenericLiteralNode;
 import trufflesom.interpreter.nodes.literals.IntegerLiteralNode;
 import trufflesom.interpreter.nodes.literals.LiteralNode;
 import trufflesom.interpreter.supernodes.IntIncrementNodeGen;
+import trufflesom.interpreter.supernodes.LocalArgGreaterThanInt;
 import trufflesom.interpreter.supernodes.LocalFieldStringEqualsNode;
 import trufflesom.interpreter.supernodes.LocalVariableSquareNodeGen;
 import trufflesom.interpreter.supernodes.NonLocalFieldStringEqualsNode;
@@ -345,6 +346,10 @@ public class ParserAst extends Parser<MethodGenerationContext> {
       if (binSelector.equals("-")) {
         return IntIncrementNodeGen.create(-lit.executeLong(null), true, receiver)
                                   .initialize(coordWithL);
+      }
+      if (binSelector.equals(">") && receiver instanceof LocalArgumentReadNode) {
+        return new LocalArgGreaterThanInt(((LocalArgumentReadNode) receiver).getArg(),
+            lit.executeLong(null)).initialize(coordWithL);
       }
     }
 
