@@ -62,10 +62,13 @@ import trufflesom.interpreter.nodes.literals.BlockNode;
 import trufflesom.interpreter.supernodes.IntIncrementNode;
 import trufflesom.interpreter.supernodes.LocalVarReadUnaryMsgWriteNode;
 import trufflesom.interpreter.supernodes.LocalVariableSquareNode;
+import trufflesom.interpreter.supernodes.MiniBytecode;
 import trufflesom.interpreter.supernodes.NonLocalVarReadUnaryMsgWriteNode;
 import trufflesom.interpreter.supernodes.NonLocalVariableSquareNode;
 import trufflesom.primitives.Primitives;
 import trufflesom.vm.NotYetImplementedException;
+import trufflesom.vm.SymbolTable;
+import trufflesom.vm.VmSettings;
 import trufflesom.vmobjects.SClass;
 import trufflesom.vmobjects.SInvokable;
 import trufflesom.vmobjects.SInvokable.SMethod;
@@ -220,6 +223,19 @@ public class MethodGenerationContext
   }
 
   protected SMethod assembleMethod(ExpressionNode body, final long coord) {
+    String className = holderGenc.getName().getString();
+    String methodName = signature.getString();
+    Source source = holderGenc.getSource();
+
+    if (VmSettings.UseAstInterp) {
+      if (className.equals("List")) {
+        if (methodName.equals("isShorter:than:")) {
+          body = new MiniBytecode(new byte[] {0, 1, 2, 13, 3, 4, 6, 7, 5, 6, 8, 9, 2, 10},
+              SymbolTable.symbolFor("next")).initialize(coord);
+        }
+      }
+    }
+
     if (needsToCatchNonLocalReturn()) {
       body = createCatchNonLocalReturn(body, getFrameOnStackMarker(coord));
     }
