@@ -66,6 +66,13 @@ public abstract class FieldAccessorNode extends Node {
       return specialize(obj, reason, next).read(obj);
     }
 
+    public abstract boolean isLong(SObject obj);
+
+    public LongStorageLocation getLongStorage(final SObject obj) {
+      CompilerDirectives.transferToInterpreterAndInvalidate();
+      throw new UnsupportedOperationException();
+    }
+
     protected final AbstractReadFieldNode specialize(final SObject obj,
         final String reason, final AbstractReadFieldNode next) {
       CompilerDirectives.transferToInterpreterAndInvalidate();
@@ -90,6 +97,20 @@ public abstract class FieldAccessorNode extends Node {
       CompilerDirectives.transferToInterpreterAndInvalidate();
       return specializeAndRead(obj, "uninitalized node",
           new UninitializedReadFieldNode(fieldIndex));
+    }
+
+    @Override
+    public boolean isLong(final SObject obj) {
+      CompilerDirectives.transferToInterpreterAndInvalidate();
+      return specialize(obj, "uninitalized node",
+          new UninitializedReadFieldNode(fieldIndex)).isLong(obj);
+    }
+
+    @Override
+    public LongStorageLocation getLongStorage(final SObject obj) {
+      CompilerDirectives.transferToInterpreterAndInvalidate();
+      return specialize(obj, "uninitalized node",
+          new UninitializedReadFieldNode(fieldIndex)).getLongStorage(obj);
     }
   }
 
@@ -137,6 +158,19 @@ public abstract class FieldAccessorNode extends Node {
         return replace(SOMNode.unwrapIfNeeded(nextInCache)).read(obj);
       }
     }
+
+    @Override
+    public boolean isLong(final SObject obj) {
+      try {
+        if (hasExpectedLayout(obj)) {
+          return false;
+        } else {
+          return respecializedNodeOrNext(obj).isLong(obj);
+        }
+      } catch (InvalidAssumptionException e) {
+        return replace(SOMNode.unwrapIfNeeded(nextInCache)).isLong(obj);
+      }
+    }
   }
 
   public static final class ReadLongFieldNode extends ReadSpecializedFieldNode {
@@ -167,6 +201,32 @@ public abstract class FieldAccessorNode extends Node {
         return readLong(obj);
       } catch (UnexpectedResultException e) {
         return e.getResult();
+      }
+    }
+
+    @Override
+    public boolean isLong(final SObject obj) {
+      try {
+        if (hasExpectedLayout(obj)) {
+          return true;
+        } else {
+          return respecializedNodeOrNext(obj).isLong(obj);
+        }
+      } catch (InvalidAssumptionException e) {
+        return replace(SOMNode.unwrapIfNeeded(nextInCache)).isLong(obj);
+      }
+    }
+
+    @Override
+    public LongStorageLocation getLongStorage(final SObject obj) {
+      try {
+        if (hasExpectedLayout(obj)) {
+          return storage;
+        } else {
+          return respecializedNodeOrNext(obj).getLongStorage(obj);
+        }
+      } catch (InvalidAssumptionException e) {
+        return replace(SOMNode.unwrapIfNeeded(nextInCache)).getLongStorage(obj);
       }
     }
   }
@@ -201,6 +261,19 @@ public abstract class FieldAccessorNode extends Node {
         return e.getResult();
       }
     }
+
+    @Override
+    public boolean isLong(final SObject obj) {
+      try {
+        if (hasExpectedLayout(obj)) {
+          return false;
+        } else {
+          return respecializedNodeOrNext(obj).isLong(obj);
+        }
+      } catch (InvalidAssumptionException e) {
+        return replace(SOMNode.unwrapIfNeeded(nextInCache)).isLong(obj);
+      }
+    }
   }
 
   public static final class ReadObjectFieldNode extends ReadSpecializedFieldNode {
@@ -222,6 +295,19 @@ public abstract class FieldAccessorNode extends Node {
         }
       } catch (InvalidAssumptionException e) {
         return replace(SOMNode.unwrapIfNeeded(nextInCache)).read(obj);
+      }
+    }
+
+    @Override
+    public boolean isLong(final SObject obj) {
+      try {
+        if (hasExpectedLayout(obj)) {
+          return false;
+        } else {
+          return respecializedNodeOrNext(obj).isLong(obj);
+        }
+      } catch (InvalidAssumptionException e) {
+        return replace(SOMNode.unwrapIfNeeded(nextInCache)).isLong(obj);
       }
     }
   }
